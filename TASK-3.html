@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Table from One Number to Another</title>
+</head>
+
+<body>
+    <h2>Generate Table from One Number to Another (No for loop)</h2>
+
+    <label>Start Number:</label>
+    <input type="number" id="start"><br><br>
+
+    <label>End Number:</label>
+    <input type="number" id="end"><br><br>
+
+    <button onclick="generateTable()">Generate</button>
+
+    <ul id="output"></ul>
+
+    <script>
+        function generateTable() {
+            const start = parseInt(document.getElementById("start").value);
+            const end = parseInt(document.getElementById("end").value);
+            const outputList = document.getElementById("output");
+            outputList.innerHTML = ''; // Clear previous output
+
+            const length = Math.abs(end - start) + 1;
+
+            const table = Array.from({
+                length
+            }, (_, i) => start + i * Math.sign(end - start));
+
+            table.forEach(num => {
+                const li = document.createElement("li");
+                li.textContent = num;
+                outputList.appendChild(li);
+            });
+        }
+    </script>
+</body>
+
+</html>

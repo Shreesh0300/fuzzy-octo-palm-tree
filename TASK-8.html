@@ -1,0 +1,226 @@
+<!--This mini web app includes:
+
+ Login Form with Validation
+ Dynamic Student Dashboard after login
+ Live GPA Calculator (real-time using DOM events)
+ Game Zone tab with a playable embedded game (Tic Tac Toe)
+All done using JavaScript DOM manipulation only, no frameworks
+
+Key Concepts Used:
+DOM event listeners (click, input)
+
+Conditional rendering (hiding/showing parts of the DOM)
+
+Dynamic form validation
+
+Grid-based game using JavaScript only-->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Smart Student Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        #dashboard,
+        #gameZone,
+        #registerPanel {
+            display: none;
+        }
+        
+        .grade-input {
+            width: 60px;
+            text-align: center;
+        }
+        
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 60px);
+            gap: 5px;
+            margin: 20px auto;
+        }
+        
+        .cell {
+            height: 60px;
+            background: #eee;
+            font-size: 24px;
+            text-align: center;
+            line-height: 60px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+
+    <div class="container mt-5">
+        <!-- Login Panel -->
+        <div id="loginPanel" class="card p-4">
+            <h3 class="mb-3">🔐 Student Login</h3>
+            <input type="text" id="loginUsername" class="form-control mb-2" placeholder="Enter username" required>
+            <input type="password" id="loginPassword" class="form-control mb-2" placeholder="Enter password" required>
+            <button class="btn btn-primary" onclick="login()">Login</button>
+            <button class="btn btn-link" onclick="showRegister()">Register</button>
+            <p id="loginError" class="text-danger mt-2 d-none">⏳ Checking... Invalid login! Try again.</p>
+        </div>
+
+        <!-- Registration Panel -->
+        <div id="registerPanel" class="card p-4">
+            <h3 class="mb-3">📝 Register</h3>
+            <input type="text" id="registerUsername" class="form-control mb-2" placeholder="Choose username" required>
+            <input type="password" id="registerPassword" class="form-control mb-2" placeholder="Choose password" required>
+            <button class="btn btn-success" onclick="register()">Register</button>
+            <button class="btn btn-link" onclick="showLogin()">Back to Login</button>
+            <p id="registerSuccess" class="text-success mt-2 d-none">✅ Registration successful! Please login.</p>
+        </div>
+
+        <!-- Dashboard -->
+        <div id="dashboard">
+            <div class="mt-4">
+                <h3>📊 GPA Calculator</h3>
+                <div class="row mb-3">
+                    <div class="col"><input type="number" min="0" max="10" class="form-control grade-input gpa" placeholder="S1"></div>
+                    <div class="col"><input type="number" min="0" max="10" class="form-control grade-input gpa" placeholder="S2"></div>
+                    <div class="col"><input type="number" min="0" max="10" class="form-control grade-input gpa" placeholder="S3"></div>
+                    <div class="col"><input type="number" min="0" max="10" class="form-control grade-input gpa" placeholder="S4"></div>
+                    <div class="col"><input type="number" min="0" max="10" class="form-control grade-input gpa" placeholder="S5"></div>
+                    <div class="col"><input type="number" min="0" max="10" class="form-control grade-input gpa" placeholder="S6"></div>
+                    <div class="col"><input type="number" min="0" max="10" class="form-control grade-input gpa" placeholder="S7"></div>
+                    <div class="col"><input type="number" min="0" max="10" class="form-control grade-input gpa" placeholder="S8"></div>
+                </div>
+                <p><strong>Your GPA:</strong> <span id="gpaResult">--</span></p>
+            </div>
+
+            <hr>
+
+            <div>
+                <h3>🎮 Game Zone</h3>
+                <button class="btn btn-outline-success" onclick="toggleGame()">Open Game</button>
+            </div>
+        </div>
+
+        <!-- Game -->
+        <div id="gameZone" class="mt-4">
+            <h4>Tic Tac Toe</h4>
+            <div class="board" id="board"></div>
+            <p id="winner" class="fw-bold mt-2"></p>
+        </div>
+    </div>
+
+    <script>
+        // Store users in localStorage
+        const USERS_KEY = 'registeredUsers';
+        const getUsers = () => JSON.parse(localStorage.getItem(USERS_KEY)) || [];
+        const saveUsers = (users) => localStorage.setItem(USERS_KEY, JSON.stringify(users));
+
+        function showRegister() {
+            document.getElementById('loginPanel').style.display = 'none';
+            document.getElementById('registerPanel').style.display = 'block';
+        }
+
+        function showLogin() {
+            document.getElementById('registerPanel').style.display = 'none';
+            document.getElementById('loginPanel').style.display = 'block';
+        }
+
+        function register() {
+            const username = document.getElementById('registerUsername').value;
+            const password = document.getElementById('registerPassword').value;
+            if (!username || !password) return;
+            const users = getUsers();
+            if (users.find(u => u.username === username)) {
+                alert('Username already exists!');
+                return;
+            }
+            users.push({
+                username,
+                password
+            });
+            saveUsers(users);
+            document.getElementById('registerSuccess').classList.remove('d-none');
+            setTimeout(showLogin, 1500);
+        }
+
+        function login() {
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            document.getElementById('loginError').classList.add('d-none');
+            document.getElementById('loginError').innerText = '⏳ Checking...';
+            setTimeout(() => {
+                const users = getUsers();
+                const match = users.find(u => u.username === username && u.password === password);
+                if (match) {
+                    document.getElementById('loginPanel').style.display = 'none';
+                    document.getElementById('dashboard').style.display = 'block';
+                } else {
+                    document.getElementById('loginError').innerText = '❌ Invalid login! Try again.';
+                    document.getElementById('loginError').classList.remove('d-none');
+                }
+            }, 1000);
+        }
+
+        // GPA Calculator
+        const gradeInputs = document.querySelectorAll('.gpa');
+        gradeInputs.forEach(input => {
+            input.addEventListener('input', () => {
+                const grades = Array.from(gradeInputs).map(i => parseFloat(i.value) || 0);
+                const total = grades.reduce((a, b) => a + b, 0);
+                const avg = total / grades.length;
+                document.getElementById('gpaResult').innerText = avg.toFixed(2);
+            });
+        });
+
+        // Tic Tac Toe Game
+        const boardDiv = document.getElementById('board');
+        const winnerText = document.getElementById('winner');
+        let board = Array(9).fill('');
+        let current = 'X';
+
+        function drawBoard() {
+            boardDiv.innerHTML = '';
+            board.forEach((val, i) => {
+                const div = document.createElement('div');
+                div.className = 'cell';
+                div.innerText = val;
+                div.onclick = () => {
+                    if (!val && !checkWinner()) {
+                        board[i] = current;
+                        current = current === 'X' ? 'O' : 'X';
+                        drawBoard();
+                        if (checkWinner()) {
+                            winnerText.innerText = board[i] + ' wins!';
+                        }
+                    }
+                };
+                boardDiv.appendChild(div);
+            });
+        }
+
+        function checkWinner() {
+            const wins = [
+                [0, 1, 2],
+                [3, 4, 5],
+                [6, 7, 8],
+                [0, 3, 6],
+                [1, 4, 7],
+                [2, 5, 8],
+                [0, 4, 8],
+                [2, 4, 6]
+            ];
+            return wins.some(([a, b, c]) => board[a] && board[a] === board[b] && board[b] === board[c]);
+        }
+
+        function toggleGame() {
+            const zone = document.getElementById('gameZone');
+            zone.style.display = zone.style.display === 'none' ? 'block' : 'none';
+            board = Array(9).fill('');
+            current = 'X';
+            winnerText.innerText = '';
+            drawBoard();
+        }
+    </script>
+
+</body>
+
+</html>

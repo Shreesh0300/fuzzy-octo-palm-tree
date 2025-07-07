@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Snake Game</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 30px;
+            font-family: Arial, sans-serif;
+        }
+        
+        #board {
+            display: grid;
+            grid-template-columns: repeat(20, 20px);
+            grid-template-rows: repeat(20, 20px);
+            gap: 1px;
+        }
+        
+        .cell {
+            width: 20px;
+            height: 20px;
+            background-color: #ddd;
+        }
+        
+        .snake {
+            background-color: green;
+        }
+        
+        .food {
+            background-color: red;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>🐍 Snake Game (Use Arrow Keys)</h2>
+    <div id="board"></div>
+    <p id="status"></p>
+
+    <script>
+        const board = document.getElementById('board');
+        const status = document.getElementById('status');
+        const gridSize = 20;
+        const totalCells = gridSize * gridSize;
+        const cells = [];
+
+        // Setup the board
+        for (let i = 0; i < totalCells; i++) {
+            const cell = document.createElement('div');
+            cell.classList.add('cell');
+            board.appendChild(cell);
+            cells.push(cell);
+        }
+
+        let snake = [42, 41, 40]; // Starting position
+        let direction = 1; // Right
+        let food = generateFood();
+
+        function generateFood() {
+            let newFood;
+            do {
+                newFood = Math.floor(Math.random() * totalCells);
+            } while (snake.includes(newFood));
+            return newFood;
+        }
+
+        function drawBoard() {
+            cells.forEach(cell => cell.className = 'cell');
+            snake.forEach(i => cells[i].classList.add('snake'));
+            cells[food].classList.add('food');
+        }
+
+        function moveSnake() {
+            const head = snake[0];
+            let newHead = head + direction;
+
+            // Wall collision
+            const hitLeft = head % gridSize === 0 && direction === -1;
+            const hitRight = head % gridSize === gridSize - 1 && direction === 1;
+            const hitTop = head < gridSize && direction === -gridSize;
+            const hitBottom = head >= totalCells - gridSize && direction === gridSize;
+
+            if (hitLeft || hitRight || hitTop || hitBottom || snake.includes(newHead)) {
+                clearInterval(game);
+                status.innerText = '💥 Game Over!';
+                return;
+            }
+
+            snake.unshift(newHead);
+
+            if (newHead === food) {
+                food = generateFood();
+            } else {
+                snake.pop();
+            }
+
+            drawBoard();
+        }
+
+        // Arrow key controls
+        document.addEventListener('keydown', e => {
+            if (e.key === 'ArrowUp' && direction !== gridSize) direction = -gridSize;
+            if (e.key === 'ArrowDown' && direction !== -gridSize) direction = gridSize;
+            if (e.key === 'ArrowLeft' && direction !== 1) direction = -1;
+            if (e.key === 'ArrowRight' && direction !== -1) direction = 1;
+        });
+
+        drawBoard();
+        const game = setInterval(moveSnake, 200);
+    </script>
+
+</body>
+
+</html>

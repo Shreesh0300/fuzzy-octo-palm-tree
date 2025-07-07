@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Tic Tac Toe</title>
+    <style>
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 60px);
+            gap: 5px;
+            margin: 20px 0;
+        }
+        
+        .cell {
+            width: 60px;
+            height: 60px;
+            text-align: center;
+            line-height: 60px;
+            background: #eee;
+            font-size: 24px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Tic Tac Toe</h2>
+    <div class="board" id="board"></div>
+    <p id="winner"></p>
+
+    <script>
+        const board = document.getElementById("board");
+        let cells = Array(9).fill("");
+        let currentPlayer = "X";
+        const winMsg = document.getElementById("winner");
+
+        function checkWinner() {
+            const wins = [
+                [0, 1, 2],
+                [3, 4, 5],
+                [6, 7, 8],
+                [0, 3, 6],
+                [1, 4, 7],
+                [2, 5, 8],
+                [0, 4, 8],
+                [2, 4, 6]
+            ];
+            for (const combo of wins) {
+                const [a, b, c] = combo;
+                if (cells[a] && cells[a] === cells[b] && cells[b] === cells[c]) {
+                    winMsg.innerText = `${cells[a]} wins!`;
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function render() {
+            board.innerHTML = "";
+            cells.forEach((val, i) => {
+                const div = document.createElement("div");
+                div.className = "cell";
+                div.innerText = val;
+                div.onclick = () => {
+                    if (!cells[i] && !winMsg.innerText) {
+                        cells[i] = currentPlayer;
+                        currentPlayer = currentPlayer === "X" ? "O" : "X";
+                        render();
+                        checkWinner();
+                    }
+                };
+                board.appendChild(div);
+            });
+        }
+
+        render();
+    </script>
+</body>
+
+</html>
